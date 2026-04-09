@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lift & Shift Survival Guide — CRG → Thermo Fisher Migration</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00d4ff">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Survival Guide Offline Mode: Active'))
+        .catch(err => console.log('Worker Registration Failed', err));
+    });
+  }
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2230;
+    --border: #2a3347;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --accent3: #39d353;
+    --warn: #f0a500;
+    --danger: #f85149;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-dim: #4a5568;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 0;
+  }
+
+  /* COVER */
+  .cover {
+    background: linear-gradient(135deg, #0d1117 0%, #0a1628 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 60px 50px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 40px,
+      rgba(0,212,255,0.015) 40px, rgba(0,212,255,0.015) 41px
+    ), repeating-linear-gradient(
+      90deg, transparent, transparent 40px,
+      rgba(0,212,255,0.015) 40px, rgba(0,212,255,0.015) 41px
+    );
+  }
+  .cover-inner { position: relative; z-index: 1; max-width: 900px; }
+  .cover-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border: 1px solid rgba(0,212,255,0.3);
+    padding: 4px 12px;
+    display: inline-block;
+    margin-bottom: 24px;
+  }
+  .cover h1 {
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .cover h1 span { color: var(--accent); }
+  .cover-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    font-weight: 300;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .cover-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .cover-meta-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .cover-meta-value {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  /* LAYOUT */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 40px;
+  }
+
+  /* TOC */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+    margin-bottom: 56px;
+  }
+  .toc-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 32px;
+  }
+  .toc-item {
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .toc-item:hover { color: var(--accent); }
+  .toc-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    min-width: 20px;
+  }
+
+  /* SECTIONS */
+  .section {
+    margin-bottom: 64px;
+  }
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+    padding: 4px 10px;
+    min-width: 44px;
+    text-align: center;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  .section-title-block h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .section-title-block p {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  /* PHASE BLOCKS */
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .phase-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .phase-icon.blue { background: rgba(0,212,255,0.15); color: var(--accent); border: 1px solid rgba(0,212,255,0.3); }
+  .phase-icon.orange { background: rgba(255,107,53,0.15); color: var(--accent2); border: 1px solid rgba(255,107,53,0.3); }
+  .phase-icon.green { background: rgba(57,211,83,0.15); color: var(--accent3); border: 1px solid rgba(57,211,83,0.3); }
+  .phase-icon.yellow { background: rgba(240,165,0,0.15); color: var(--warn); border: 1px solid rgba(240,165,0,0.3); }
+  .phase-icon.red { background: rgba(248,81,73,0.15); color: var(--danger); border: 1px solid rgba(248,81,73,0.3); }
+
+  .phase-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+  .phase-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+  .phase-body {
+    padding: 20px 20px 20px 60px;
+  }
+
+  /* STEPS */
+  .step-list { list-style: none; }
+  .step-list li {
+    position: relative;
+    padding: 8px 0 8px 22px;
+    color: var(--text);
+    font-size: 13.5px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .step-list li:last-child { border-bottom: none; }
+  .step-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    top: 10px;
+  }
+  .step-list li strong { color: var(--accent); font-weight: 600; }
+  .step-list li code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.15);
+    padding: 1px 6px;
+    color: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* CALLOUTS */
+  .callout {
+    border-left: 3px solid;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+  .callout.warn { border-color: var(--warn); background: rgba(240,165,0,0.05); }
+  .callout.danger { border-color: var(--danger); background: rgba(248,81,73,0.05); }
+  .callout.info { border-color: var(--accent); background: rgba(0,212,255,0.05); }
+  .callout.success { border-color: var(--accent3); background: rgba(57,211,83,0.05); }
+  .callout-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .callout.warn .callout-label { color: var(--warn); }
+  .callout.danger .callout-label { color: var(--danger); }
+  .callout.info .callout-label { color: var(--accent); }
+  .callout.success .callout-label { color: var(--accent3); }
+
+  /* TABLES */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 12px 0;
+  }
+  .data-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  .data-table tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .tag.green { background: rgba(57,211,83,0.15); color: var(--accent3); border: 1px solid rgba(57,211,83,0.25); }
+  .tag.red { background: rgba(248,81,73,0.15); color: var(--danger); border: 1px solid rgba(248,81,73,0.25); }
+  .tag.yellow { background: rgba(240,165,0,0.15); color: var(--warn); border: 1px solid rgba(240,165,0,0.25); }
+  .tag.blue { background: rgba(0,212,255,0.12); color: var(--accent); border: 1px solid rgba(0,212,255,0.25); }
+  .tag.gray { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; }
+  .checklist li {
+    padding: 7px 0 7px 28px;
+    position: relative;
+    font-size: 13.5px;
+    border-bottom: 1px dashed rgba(255,255,255,0.04);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before {
+    content: '□';
+    position: absolute;
+    left: 4px;
+    color: var(--text-dim);
+    font-size: 14px;
+    top: 7px;
+  }
+
+  /* OPTIONAL BADGE */
+  .optional-banner {
+    background: rgba(240,165,0,0.07);
+    border: 1px solid rgba(240,165,0,0.2);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: var(--warn);
+  }
+
+  /* TWO COLUMN */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .col-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px 18px;
+  }
+  .col-block h4 {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* FLOWCHART SVG AREA */
+  .flowchart-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+  .flowchart-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* INLINE CODE BLOCK */
+  .code-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 10px 0;
+    line-height: 1.8;
+  }
+
+  /* PHASE CONNECTOR */
+  .phase-connector {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 18px;
+    margin: 4px 0;
+  }
+
+  /* ROLLBACK BOX */
+  .rollback-box {
+    background: rgba(248,81,73,0.04);
+    border: 1px solid rgba(248,81,73,0.2);
+    padding: 16px 20px;
+    margin-top: 12px;
+  }
+  .rollback-box h4 {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--danger);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .cover { padding: 32px 24px; }
+    .container { padding: 32px 20px; }
+    .two-col { grid-template-columns: 1fr; }
+    .toc-grid { grid-template-columns: 1fr; }
+    .cover h1 { font-size: 26px; }
+  }
+
+  @media print {
+    body { background: white; color: black; }
+    .phase, .col-block, .flowchart-wrap { border: 1px solid #ccc; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-inner">
+    <div class="cover-tag">Internal Migration Reference</div>
+    <h1>Lift &amp; Shift<br><span>Survival Guide</span></h1>
+    <p class="cover-sub">Power Platform Tenant Migration — CRG → Thermo Fisher Scientific</p>
+    <div class="cover-meta">
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Source Tenant</span>
+        <span class="cover-meta-value">CRG</span>
+      </div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Target Tenant</span>
+        <span class="cover-meta-value">Thermo Fisher Scientific</span>
+      </div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Strategy</span>
+        <span class="cover-meta-value">Lift &amp; Shift — No Redesign</span>
+      </div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Dev Environment</span>
+        <span class="cover-meta-value">HMs (Hosted Machines)</span>
+      </div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Test / Prod</span>
+        <span class="cover-meta-value">HMGs (Machine Groups)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <div class="toc-grid">
+      <div class="toc-item"><span class="toc-num">01</span> Survival Checklist — Must-Haves Only</div>
+      <div class="toc-item"><span class="toc-num">02</span> Explicit Approval to Ignore Best Practices</div>
+      <div class="toc-item"><span class="toc-num">03a</span> Documentation — Must-Haves</div>
+      <div class="toc-item"><span class="toc-num">03b</span> Documentation — Good-to-Haves (Optional)</div>
+      <div class="toc-item"><span class="toc-num">03c</span> Testing Strategy</div>
+      <div class="toc-item"><span class="toc-num">04</span> Migration Flowcharts</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ SECTION 1 ═══════════════════════════════════ -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">01</div>
+      <div class="section-title-block">
+        <h2>Lift &amp; Shift Survival Checklist</h2>
+        <p>Must-haves only — follow these steps in order, every time</p>
+      </div>
+    </div>
+
+    <div class="callout danger">
+      <span class="callout-label">⚡ Non-Negotiable</span>
+      Skip any step below and your flow will fail in the target tenant. Do not improvise the order.
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon blue">01</div>
+        <div class="phase-title">Pre-Export Checks — Do This Before Touching the Source</div>
+        <span class="phase-subtitle">Source Tenant · CRG</span>
+      </div>
+      <div class="phase-body">
+        <ul class="step-list">
+          <li>Confirm the flow exists inside a <strong>named, non-default Solution</strong>. If it lives in the Default Solution, add it to a proper Solution first.</li>
+          <li>Verify all <strong>child flows</strong> (flows called by this flow) are also inside the same Solution.</li>
+          <li>Check that every connector in the flow has a <strong>Connection Reference</strong> — not a hardcoded personal connection.</li>
+          <li>Open each Connection Reference and note the connector type (SharePoint, Teams, Dataverse, HTTP, etc.). You will need to recreate these in the target.</li>
+          <li>List all <strong>Environment Variables</strong> used by the flow. Record their internal names (Schema names) and their current values.</li>
+          <li>If the flow uses any <strong>custom connectors</strong>, export those separately and note their endpoints and authentication type.</li>
+          <li>Confirm the Solution contains <strong>no Flows in a broken or suspended state</strong>. Fix or remove them before export.</li>
+          <li>If flows reference <strong>SharePoint lists, Dataverse tables, or other data sources</strong> — record the exact URLs or table names. These must exist in the target tenant before import.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-connector">↓</div>
+
+    <!-- STEP 2 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon blue">02</div>
+        <div class="phase-title">Export as Unmanaged — From CRG Tenant</div>
+        <span class="phase-subtitle">Source Tenant · CRG</span>
+      </div>
+      <div class="phase-body">
+        <ul class="step-list">
+          <li>Go to <strong>make.powerapps.com</strong> in the CRG tenant.</li>
+          <li>Navigate to <strong>Solutions</strong> in the left nav. Select your Solution.</li>
+          <li>Click <strong>Export Solution</strong>.</li>
+          <li>Select <strong>Unmanaged</strong> — always use Unmanaged when you need to edit or re-import later. Never use Managed for migration unless the target environment is Production and you intend no further edits there.</li>
+          <li>Click <strong>Next</strong>, then <strong>Export</strong>. Save the <code>.zip</code> file to a known location.</li>
+          <li>Keep the zip file name unchanged. Do not rename it.</li>
+        </ul>
+        <div class="callout info">
+          <span class="callout-label">Managed vs Unmanaged — Quick Rule</span>
+          Use <strong>Unmanaged</strong> in Dev and Test (you can edit after import). Use <strong>Managed</strong> in Production (locked down, cannot edit). For this migration, start with Unmanaged in Dev to validate first.
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-connector">↓</div>
+
+    <!-- STEP 3 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon orange">03</div>
+        <div class="phase-title">Prepare the Target Tenant Before Import</div>
+        <span class="phase-subtitle">Target Tenant · Thermo Fisher</span>
+      </div>
+      <div class="phase-body">
+        <ul class="step-list">
+          <li>Log in to <strong>make.powerapps.com</strong> in the Thermo Fisher tenant.</li>
+          <li>Select the correct <strong>target environment</strong> (Dev, Test, or Prod) from the environment switcher.</li>
+          <li>Create any <strong>SharePoint sites, lists, or Dataverse tables</strong> that the flow depends on. The import will not create these for you.</li>
+          <li>Create all required <strong>Connections</strong> in the target tenant. Go to <strong>Data → Connections → New Connection</strong> and authenticate with the correct service account or credentials for each connector type.</li>
+          <li>If custom connectors exist, import them first before importing the Solution.</li>
+          <li>If the Solution uses <strong>Environment Variables</strong>, prepare their values. You will set these during or immediately after import.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-connector">↓</div>
+
+    <!-- STEP 4 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon orange">04</div>
+        <div class="phase-title">Import Solution Into Target Tenant</div>
+        <span class="phase-subtitle">Target Tenant · Thermo Fisher</span>
+      </div>
+      <div class="phase-body">
+        <ul class="step-list">
+          <li>In the Thermo Fisher tenant, go to <strong>Solutions → Import Solution</strong>.</li>
+          <li>Upload the <code>.zip</code> file from your export.</li>
+          <li>On the <strong>Import Options</strong> screen, you will be prompted to map <strong>Connection References</strong>. Map each one to the connections you created in Step 03.</li>
+          <li>Do not skip unmapped connection references. An unmapped connection reference means that flow will fail at runtime.</li>
+          <li>Set all <strong>Environment Variable values</strong> on the import screen. If a field shows the old value from the source, replace it with the target value (e.g., updated SharePoint URL).</li>
+          <li>Click <strong>Import</strong> and wait for completion. Do not close the browser.</li>
+          <li>On success, verify the Solution appears in the Solutions list with a green status.</li>
+        </ul>
+        <div class="callout warn">
+          <span class="callout-label">⚠ Common Failure</span>
+          If the import shows a warning about Connection References not mapped, stop. Do not proceed. Go back to Step 03 and create the missing connections first.
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-connector">↓</div>
+
+    <!-- STEP 5 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon green">05</div>
+        <div class="phase-title">Post-Import: Turn Flows On and Assign Owners</div>
+        <span class="phase-subtitle">Target Tenant · Thermo Fisher</span>
+      </div>
+      <div class="phase-body">
+        <ul class="step-list">
+          <li>Open the imported Solution. Check each flow — they will likely be <strong>turned off</strong> by default after import.</li>
+          <li>Open each flow and click <strong>Turn on</strong>.</li>
+          <li>If a flow is owned by a user who does not exist in the Thermo Fisher tenant, <strong>reassign the owner</strong>. Go to the flow details and use the "Run only users" or ownership settings.</li>
+          <li>For flows using <strong>service accounts</strong>, ensure the service account credentials are active in the target tenant and the connections are authenticated.</li>
+          <li>For RPA flows (Desktop flows), confirm the <strong>machine connection</strong> points to a registered machine or machine group in the target tenant. Old machine connections from CRG will not work.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-connector">↓</div>
+
+    <!-- STEP 6 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon green">06</div>
+        <div class="phase-title">Post-Import Validation — Minimum Required</div>
+        <span class="phase-subtitle">Target Tenant · Thermo Fisher</span>
+      </div>
+      <div class="phase-body">
+        <ul class="step-list">
+          <li>Open each flow in the editor. Visually inspect that all actions load without red error banners.</li>
+          <li>Trigger the flow manually once using <strong>Test → Manually</strong>.</li>
+          <li>Check the <strong>Run History</strong> — confirm the run shows "Succeeded" end-to-end.</li>
+          <li>If any step shows a failure: open that step, check if the connection reference is properly mapped, and verify the target resource (SharePoint list, table, etc.) exists.</li>
+          <li>For Desktop flows: run a test execution from the <strong>Power Automate Desktop console</strong> on the target machine.</li>
+          <li>Confirm that <strong>all child flows</strong> also completed successfully during the parent flow run.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- COMMON FAILURES -->
+    <hr class="divider">
+    <h3 style="font-size:15px; margin-bottom:16px; color:var(--text);">Common Failure Points — Know These Before You Start</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Failure</th>
+          <th>Why It Happens</th>
+          <th>How to Fix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Connection Reference not mapped</td>
+          <td>Connection didn't exist in target at import time</td>
+          <td>Create connection first, then re-import or update mapping in Solution settings</td>
+        </tr>
+        <tr>
+          <td>Flow fails on first action</td>
+          <td>Environment variable still points to source tenant URL</td>
+          <td>Edit Environment Variable value in the Solution after import</td>
+        </tr>
+        <tr>
+          <td>Flow imported but stays off</td>
+          <td>Default behavior after Solution import</td>
+          <td>Manually turn on each flow inside the Solution</td>
+        </tr>
+        <tr>
+          <td>Child flow not found</td>
+          <td>Child flow was not included in the Solution</td>
+          <td>Go back to source, add child flow to Solution, re-export</td>
+        </tr>
+        <tr>
+          <td>Desktop flow fails — machine not found</td>
+          <td>Machine connection references CRG machine</td>
+          <td>Update the Desktop flow's machine connection to a Thermo Fisher registered machine</td>
+        </tr>
+        <tr>
+          <td>403 / permission error at runtime</td>
+          <td>Service account not licensed or not given access in target</td>
+          <td>Verify service account has Power Automate license and access to target resources</td>
+        </tr>
+        <tr>
+          <td>Import fails with dependency error</td>
+          <td>Custom connector or shared component not present in target</td>
+          <td>Import custom connectors and shared components before the main Solution</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════ SECTION 2 ═══════════════════════════════════ -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">02</div>
+      <div class="section-title-block">
+        <h2>Explicit Approval to Ignore Best Practices</h2>
+        <p>This section formally grants you permission to move without fixing</p>
+      </div>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-label">✅ Official Stance</span>
+      Move now. Fix later. A messy flow that runs in the target tenant is a success. A perfect flow that never gets migrated is a failure.
+    </div>
+
+    <div class="two-col" style="margin: 20px 0;">
+      <div class="col-block">
+        <h4>✅ You May Safely Ignore These</h4>
+        <ul class="step-list">
+          <li>Non-standard naming conventions on flows, actions, or variables</li>
+          <li>Missing error handling or try-catch patterns</li>
+          <li>Inconsistent use of compose vs. initialize variable</li>
+          <li>Redundant or unused actions inside flows</li>
+          <li>Flows with no descriptions or comments</li>
+          <li>Inefficient loops or nested conditions</li>
+          <li>Missing run-only user restrictions</li>
+          <li>Non-standard trigger configurations (as long as they still fire)</li>
+          <li>Overly complex expressions that work but are unreadable</li>
+          <li>Duplicate logic across flows</li>
+          <li>Hardcoded values that are non-connection-related (string labels, etc.)</li>
+          <li>Lack of logging or notification steps</li>
+        </ul>
+      </div>
+      <div class="col-block">
+        <h4>🚫 You Must Not Ignore These</h4>
+        <ul class="step-list">
+          <li><strong>Hardcoded tenant-specific URLs</strong> (CRG SharePoint URLs inside flow actions — these must be updated)</li>
+          <li><strong>Personal connections</strong> used directly — these will not work in the target tenant for another user</li>
+          <li><strong>Missing Connection References</strong> — flows using direct connections instead of references will break</li>
+          <li><strong>Flows outside a Solution</strong> — cannot be exported properly</li>
+          <li><strong>Child flows missing from Solution</strong> — parent flow will fail at the child call step</li>
+          <li><strong>Machine/machine group references</strong> tied to CRG — Desktop flows will not run</li>
+          <li><strong>Missing Environment Variables</strong> with no default value — flow will error immediately</li>
+          <li><strong>Expired or personal credentials</strong> in connections — must be refreshed in target</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-label">Reminder</span>
+      The goal of this migration is functional equivalence, not technical excellence. Every quality improvement is a post-migration task. Track issues found during migration in a backlog, not as blockers.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ SECTION 3A ═══════════════════════════════════ -->
+  <div class="section" id="s3a">
+    <div class="section-header">
+      <div class="section-number">03a</div>
+      <div class="section-title-block">
+        <h2>Documentation — Must-Haves</h2>
+        <p>Step-by-step deployment process and migration reference</p>
+      </div>
+    </div>
+
+    <!-- Deployment Process -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon blue">A</div>
+        <div class="phase-title">Standard Migration Flow: Source → Target</div>
+      </div>
+      <div class="phase-body">
+        <ul class="step-list">
+          <li><strong>Step 1 — Inventory:</strong> List every flow being migrated. Record: flow name, solution name, connectors used, environment variables, child flows.</li>
+          <li><strong>Step 2 — Source preparation:</strong> Ensure all components are inside a named Solution in CRG. Fix broken flows or exclude them intentionally.</li>
+          <li><strong>Step 3 — Export:</strong> Export Solution as Unmanaged from CRG.</li>
+          <li><strong>Step 4 — Target prep:</strong> Create connections, data sources, and environment variable placeholders in Thermo Fisher tenant.</li>
+          <li><strong>Step 5 — Import:</strong> Import Solution, map connection references, set environment variable values.</li>
+          <li><strong>Step 6 — Enable:</strong> Turn on flows, assign owners, configure machine connections for RPA.</li>
+          <li><strong>Step 7 — Test:</strong> Run test cases per the Testing Strategy (Section 03c).</li>
+          <li><strong>Step 8 — Sign-off:</strong> Developer confirms all test cases pass. Document any known issues for backlog.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- What to Include / Exclude -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon blue">B</div>
+        <div class="phase-title">What to Include and Exclude in Your Solution</div>
+      </div>
+      <div class="phase-body">
+        <table class="data-table">
+          <thead>
+            <tr><th>Component</th><th>Include?</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Cloud Flows (parent)</td><td><span class="tag green">INCLUDE</span></td><td>Always</td></tr>
+            <tr><td>Child Flows</td><td><span class="tag green">INCLUDE</span></td><td>Must be in same Solution as parent</td></tr>
+            <tr><td>Desktop Flows</td><td><span class="tag green">INCLUDE</span></td><td>Include all RPA flows called by cloud flows</td></tr>
+            <tr><td>Connection References</td><td><span class="tag green">INCLUDE</span></td><td>Mandatory — do not remove even if they look unused</td></tr>
+            <tr><td>Environment Variables</td><td><span class="tag green">INCLUDE</span></td><td>Include variable definitions; set values after import</td></tr>
+            <tr><td>Custom Connectors</td><td><span class="tag green">INCLUDE</span></td><td>Export and import separately before the main Solution</td></tr>
+            <tr><td>Canvas Apps (if linked)</td><td><span class="tag yellow">CONDITIONAL</span></td><td>Include only if the flow is triggered by or tightly coupled to the app</td></tr>
+            <tr><td>Personal connections (non-reference)</td><td><span class="tag red">EXCLUDE</span></td><td>These are user-specific and do not migrate</td></tr>
+            <tr><td>Data (SharePoint list items, DB records)</td><td><span class="tag red">EXCLUDE</span></td><td>Migrate data separately using export/import tools</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Environment Variables -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon blue">C</div>
+        <div class="phase-title">Handling Environment Variables</div>
+      </div>
+      <div class="phase-body">
+        <ul class="step-list">
+          <li>Environment Variables travel with the Solution export as <strong>definitions only</strong>. Values are not exported by default (this is by design in Power Platform).</li>
+          <li>During import, the wizard will prompt you to set each variable value. <strong>Do not skip this.</strong></li>
+          <li>If you have many variables, prepare a simple text file listing each variable Schema Name and its target value before you start the import.</li>
+          <li>If a variable has a <strong>default value</strong> set in the definition, that default will be used if you skip setting a value — verify that default is still valid for the target tenant.</li>
+          <li>To update an environment variable after import, go to: <strong>Solutions → [Your Solution] → Environment Variables → edit the value</strong>.</li>
+          <li>Never hardcode values inside flow actions to work around missing variables. Update the variable instead.</li>
+        </ul>
+        <div class="code-block">
+          Variable naming reference:<br>
+          Schema Name: &nbsp;new_SharePointSiteURL<br>
+          Source Value: &nbsp;https://crg.sharepoint.com/sites/MySite<br>
+          Target Value: &nbsp;https://thermofisher.sharepoint.com/sites/MySite
+        </div>
+      </div>
+    </div>
+
+    <!-- Managed vs Unmanaged -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon blue">D</div>
+        <div class="phase-title">Managed vs Unmanaged — Decision Rules</div>
+      </div>
+      <div class="phase-body">
+        <table class="data-table">
+          <thead>
+            <tr><th>Environment</th><th>Solution Type</th><th>Reason</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Development (Dev)</td>
+              <td><span class="tag blue">UNMANAGED</span></td>
+              <td>Developers need to edit flows after import. Unmanaged allows editing.</td>
+            </tr>
+            <tr>
+              <td>Test / UAT</td>
+              <td><span class="tag blue">UNMANAGED</span></td>
+              <td>Testers may need quick fixes. Use Unmanaged until the solution is stable.</td>
+            </tr>
+            <tr>
+              <td>Production</td>
+              <td><span class="tag green">MANAGED</span></td>
+              <td>Managed locks down the solution. No accidental edits. Changes go through proper deployment.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout warn">
+          <span class="callout-label">Important</span>
+          Never import a Managed solution into an environment where you have an existing Unmanaged version of the same solution without first removing the Unmanaged one. This causes layer conflicts.
+        </div>
+      </div>
+    </div>
+
+    <!-- Connection Reference Mapping -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon blue">E</div>
+        <div class="phase-title">Connection Reference Mapping — Step by Step</div>
+      </div>
+      <div class="phase-body">
+        <ul class="step-list">
+          <li>Before import: go to <strong>Data → Connections</strong> in the Thermo Fisher tenant and create one connection per connector type used in the Solution (SharePoint, Outlook, Teams, Dataverse, etc.).</li>
+          <li>Authenticate each connection with the correct <strong>service account</strong> — not your personal account — unless the flow is designed for personal use.</li>
+          <li>During import: the wizard shows a list of Connection References. Each reference has a dropdown. Select the matching connection you created.</li>
+          <li>If a connection reference is left as "None", the flow will import but will fail when it tries to use that connector at runtime.</li>
+          <li>After import: you can verify and update connection reference mapping by going to <strong>Solutions → [Your Solution] → Connection References</strong>.</li>
+          <li>If multiple flows share the same connector type, they should share one Connection Reference — do not create separate references for the same connector.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Minimum Validation -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon green">F</div>
+        <div class="phase-title">Minimum Validation Checklist — Before Handoff</div>
+      </div>
+      <div class="phase-body">
+        <ul class="checklist">
+          <li>Solution imported without errors (no red status)</li>
+          <li>All flows visible inside the Solution in the target tenant</li>
+          <li>All Connection References mapped to active connections</li>
+          <li>All Environment Variables set to target values</li>
+          <li>All flows turned on</li>
+          <li>Flow ownership assigned to correct account</li>
+          <li>Manual test run completed — status shows "Succeeded"</li>
+          <li>All child flows confirmed executed during parent test run</li>
+          <li>RPA: Desktop flow test completed on target machine / machine group</li>
+          <li>No broken references in flow editor (no red action blocks)</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════ SECTION 3B ═══════════════════════════════════ -->
+  <div class="section" id="s3b">
+    <div class="section-header">
+      <div class="section-number">03b</div>
+      <div class="section-title-block">
+        <h2>Documentation — Good-to-Haves</h2>
+        <p>Post-migration improvements — do not block migration on these</p>
+      </div>
+    </div>
+
+    <div class="optional-banner">
+      ⏱ OPTIONAL — Post-Migration Only. None of the items below are required for the flow to run. Complete these after successful migration and sign-off.
+    </div>
+
+    <div class="two-col">
+      <div class="col-block">
+        <h4>Code Review Checklist</h4>
+        <ul class="step-list">
+          <li>Remove unused actions and dead branches</li>
+          <li>Replace hardcoded strings with Environment Variables</li>
+          <li>Consolidate duplicate logic into child flows</li>
+          <li>Add descriptive names to all actions</li>
+          <li>Document the purpose of each flow with a description field</li>
+        </ul>
+      </div>
+      <div class="col-block">
+        <h4>Naming Conventions</h4>
+        <ul class="step-list">
+          <li>Flows: <code>[Area]-[Function]-[Type]</code> e.g. <code>HR-Onboarding-Trigger</code></li>
+          <li>Variables: camelCase, descriptive</li>
+          <li>Connection References: <code>CR_[ConnectorName]</code></li>
+          <li>Environment Variables: <code>EV_[Purpose]</code></li>
+          <li>Solutions: include team name and version</li>
+        </ul>
+      </div>
+      <div class="col-block">
+        <h4>Logging &amp; Error Handling</h4>
+        <ul class="step-list">
+          <li>Add a Scope block around critical actions</li>
+          <li>Add a "Configure run after" step set to "has failed"</li>
+          <li>Post failure details to a Teams channel or SharePoint log list</li>
+          <li>Send email alerts on unhandled failures</li>
+          <li>Add timestamps to log entries</li>
+        </ul>
+      </div>
+      <div class="col-block">
+        <h4>Performance Improvements</h4>
+        <ul class="step-list">
+          <li>Replace "Apply to each" loops with batch operations where possible</li>
+          <li>Enable concurrency on loops only if order doesn't matter</li>
+          <li>Use "Filter array" before loops instead of filtering inside the loop</li>
+          <li>Reduce unnecessary HTTP calls by caching results in variables</li>
+          <li>Break very large flows into parent/child pattern</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════ SECTION 3C ═══════════════════════════════════ -->
+  <div class="section" id="s3c">
+    <div class="section-header">
+      <div class="section-number">03c</div>
+      <div class="section-title-block">
+        <h2>Testing Strategy</h2>
+        <p>What to test, where, and how — HMs for Dev, HMGs for Test and Production</p>
+      </div>
+    </div>
+
+    <!-- HM vs HMG -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon yellow">A</div>
+        <div class="phase-title">HMs vs HMGs — When to Use Each</div>
+      </div>
+      <div class="phase-body">
+        <table class="data-table">
+          <thead>
+            <tr><th>Machine Type</th><th>Environment</th><th>Use For</th><th>Key Difference</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>HM</strong><br><span style="font-size:11px;color:var(--text-muted)">Hosted Machine</span></td>
+              <td>Development</td>
+              <td>Initial testing, debugging, attended scenarios, fixing connection issues</td>
+              <td>Persistent. Machine stays allocated. Good for interactive debugging.</td>
+            </tr>
+            <tr>
+              <td><strong>HMG</strong><br><span style="font-size:11px;color:var(--text-muted)">Hosted Machine Group</span></td>
+              <td>Test, Validation, Production</td>
+              <td>Unattended execution, scheduled runs, full end-to-end validation</td>
+              <td>Non-persistent. Machines spin up and release. Credentials must be stored securely.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Dev Testing on HMs -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon yellow">B</div>
+        <div class="phase-title">What to Test in Development Using HMs</div>
+        <span class="phase-subtitle">Attended Scenarios</span>
+      </div>
+      <div class="phase-body">
+        <ul class="step-list">
+          <li>Trigger the flow manually and step through each action in the run history.</li>
+          <li>Verify the Desktop flow launches and interacts with the correct application on the HM.</li>
+          <li>Test with real credentials — confirm the service account can authenticate to each target system.</li>
+          <li>Validate that all Environment Variable values resolve correctly at runtime.</li>
+          <li>Run the flow through a complete happy-path scenario — no shortcuts or partial runs.</li>
+          <li>Test error scenarios: wrong input, unavailable resource, timeout. Confirm the flow handles them without hanging.</li>
+          <li>Confirm child flows are triggered and return the expected outputs to the parent.</li>
+          <li>Check the flow run history for any warnings even on a "Succeeded" run.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Test/Prod Validation on HMGs -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon yellow">C</div>
+        <div class="phase-title">What to Validate in Test and Production Using HMGs</div>
+        <span class="phase-subtitle">Unattended Scenarios</span>
+      </div>
+      <div class="phase-body">
+        <ul class="step-list">
+          <li>Confirm the flow can be triggered without human interaction (scheduled or event-based trigger).</li>
+          <li>Verify the HMG has at least one available machine at the time of execution — check the machine group capacity in the Power Automate portal.</li>
+          <li>Run the flow via its actual trigger (not manual test) to simulate production conditions.</li>
+          <li>Confirm credentials stored for the HMG are valid — test a login via the machine group directly if possible.</li>
+          <li>Validate that application selectors in the Desktop flow work on the HMG — UI elements sometimes behave differently on non-persistent machines.</li>
+          <li>Check that no step requires interactive input (pop-up dialogs, MFA prompts) — these will cause unattended runs to hang.</li>
+          <li>Confirm run history in Test environment shows consistent results over multiple runs, not just one.</li>
+        </ul>
+        <div class="callout warn">
+          <span class="callout-label">Unattended MFA Warning</span>
+          If any connector or application requires MFA during runtime, the flow will hang and eventually fail in unattended mode on HMGs. Resolve MFA exceptions or use certificate-based auth before moving to Test.
+        </div>
+      </div>
+    </div>
+
+    <!-- Minimum Test Cases -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon yellow">D</div>
+        <div class="phase-title">Minimum Test Cases Before Sign-Off</div>
+      </div>
+      <div class="phase-body">
+        <table class="data-table">
+          <thead>
+            <tr><th>#</th><th>Test Case</th><th>Pass Criteria</th><th>Env</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>TC01</td><td>Manual trigger — full happy path</td><td>Run status = Succeeded, output correct</td><td>Dev / HM</td></tr>
+            <tr><td>TC02</td><td>All child flows execute</td><td>Each child flow shows Succeeded in run history</td><td>Dev / HM</td></tr>
+            <tr><td>TC03</td><td>Connection reference works</td><td>No auth errors on any connector action</td><td>Dev / HM</td></tr>
+            <tr><td>TC04</td><td>Environment variables resolve</td><td>No null/blank variable errors at runtime</td><td>Dev / HM</td></tr>
+            <tr><td>TC05</td><td>Desktop flow runs on target machine</td><td>RPA actions execute without selector failures</td><td>Dev / HM</td></tr>
+            <tr><td>TC06</td><td>Unattended trigger via actual trigger type</td><td>Flow fires and completes without manual intervention</td><td>Test / HMG</td></tr>
+            <tr><td>TC07</td><td>3 consecutive successful runs</td><td>No intermittent failures</td><td>Test / HMG</td></tr>
+            <tr><td>TC08</td><td>Error input / boundary condition</td><td>Flow handles gracefully, no infinite loop</td><td>Dev / HM</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Validating Connections, Credentials, Dependencies -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-icon yellow">E</div>
+        <div class="phase-title">How to Validate Connections, Credentials, and Dependencies</div>
+      </div>
+      <div class="phase-body">
+        <ul class="step-list">
+          <li><strong>Connections:</strong> Go to <strong>Data → Connections</strong>. Each connection should show a green status. A red warning icon means the credential is expired or invalid — click it and re-authenticate.</li>
+          <li><strong>Service Account Credentials:</strong> Confirm the service account password has not expired. Confirm it is not blocked by Conditional Access policies in the Thermo Fisher tenant.</li>
+          <li><strong>SharePoint / Dataverse:</strong> Open the target list or table in a browser with the service account. If you can't read/write manually, the flow won't be able to either.</li>
+          <li><strong>Custom Connectors:</strong> Test the connector directly via the test tab in the Custom Connector editor. Confirm the endpoint is reachable from the Thermo Fisher tenant.</li>
+          <li><strong>Machine Connections (RPA):</strong> In Power Automate portal, go to <strong>Monitor → Machines</strong>. Confirm the machine shows as "Available" or "Connected".</li>
+          <li><strong>HTTP Calls:</strong> If flows call external APIs, confirm those APIs are accessible from the Thermo Fisher network and any IP allowlisting is updated.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Failure Handling and Rollback -->
+    <div class="rollback-box">
+      <h4>⛔ Failure Handling &amp; Rollback Approach</h4>
+      <ul class="step-list">
+        <li>Do not delete the original Solution from CRG until all test cases pass in Thermo Fisher.</li>
+        <li>If import fails mid-way: note the error message, fix the specific issue (missing connection, missing component), and re-import. Power Platform imports are safe to re-run.</li>
+        <li>If flows fail in Test after passing Dev: check if the HMG machine has the required applications installed and if credentials differ from HM credentials.</li>
+        <li>Rollback for cloud flows: revert by disabling the flow in the target and reactivating in the source temporarily.</li>
+        <li>Rollback for RPA flows: redirect the parent cloud flow to call the machine in the source environment by updating the machine connection reference.</li>
+        <li>Keep a backup of the exported <code>.zip</code> file. You can re-import at any point.</li>
+        <li>If a solution is deleted in the target, you can re-import from the zip without re-exporting from source.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════ SECTION 4 — FLOWCHARTS ═══════════════════════════════════ -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">04</div>
+      <div class="section-title-block">
+        <h2>Migration Flowcharts</h2>
+        <p>Visual reference — process flows match the steps in this document</p>
+      </div>
+    </div>
+
+    <!-- FLOWCHART 1: Overall Migration Flow -->
+    <div class="flowchart-wrap">
+      <div class="flowchart-title">Flowchart 1 — Overall Migration Process (Top to Bottom)</div>
+      <svg viewBox="0 0 860 980" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:860px;display:block;margin:0 auto;">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#4a5568"/>
+          </marker>
+          <marker id="arr-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#00d4ff"/>
+          </marker>
+          <marker id="arr-red" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#f85149"/>
+          </marker>
+          <marker id="arr-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#39d353"/>
+          </marker>
+        </defs>
+
+        <!-- Phase Labels on Left -->
+        <text x="12" y="95" fill="#4a5568" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="1">SOURCE PREP</text>
+        <text x="12" y="265" fill="#4a5568" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="1">EXPORT</text>
+        <text x="12" y="455" fill="#4a5568" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="1">TARGET PREP</text>
+        <text x="12" y="645" fill="#4a5568" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="1">IMPORT</text>
+        <text x="12" y="830" fill="#4a5568" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="1">VALIDATION</text>
+
+        <!-- Phase swim lane separators -->
+        <line x1="90" y1="55" x2="90" y2="980" stroke="#1c2230" stroke-width="1"/>
+        <line x1="860" y1="140" x2="860" y2="140" stroke="none"/>
+        <!-- Horizontal phase dividers -->
+        <line x1="90" y1="155" x2="850" y2="155" stroke="#1c2230" stroke-width="1" stroke-dasharray="4,4"/>
+        <line x1="90" y1="330" x2="850" y2="330" stroke="#1c2230" stroke-width="1" stroke-dasharray="4,4"/>
+        <line x1="90" y1="525" x2="850" y2="525" stroke="#1c2230" stroke-width="1" stroke-dasharray="4,4"/>
+        <line x1="90" y1="720" x2="850" y2="720" stroke="#1c2230" stroke-width="1" stroke-dasharray="4,4"/>
+
+        <!-- ===== PHASE 1: SOURCE PREP ===== -->
+        <!-- START -->
+        <rect x="320" y="22" width="210" height="38" rx="19" fill="#0a1628" stroke="#00d4ff" stroke-width="1.5"/>
+        <text x="425" y="44" fill="#00d4ff" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600">START</text>
+        <text x="425" y="56" fill="#8b949e" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">Identify flows to migrate</text>
+        <!-- Arrow down -->
+        <line x1="425" y1="60" x2="425" y2="76" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Box: Flows in a Solution? -->
+        <rect x="270" y="76" width="310" height="36" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="425" y="90" fill="#e6edf3" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="500">Are all flows inside a Solution?</text>
+        <text x="425" y="104" fill="#8b949e" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">(not the Default Solution)</text>
+        <!-- Arrow down from decision -->
+        <line x1="425" y1="112" x2="425" y2="128" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Decision diamond -->
+        <polygon points="425,128 490,141 425,154 360,141" fill="#161b22" stroke="#f0a500" stroke-width="1.5"/>
+        <text x="425" y="138" fill="#f0a500" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" font-weight="600">YES / NO</text>
+        <text x="425" y="150" fill="#f0a500" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9">?</text>
+
+        <!-- YES arrow down -->
+        <line x1="425" y1="154" x2="425" y2="174" stroke="#39d353" stroke-width="1.5" marker-end="url(#arr-green)"/>
+        <text x="432" y="168" fill="#39d353" font-family="IBM Plex Mono, monospace" font-size="9">YES</text>
+
+        <!-- NO arrow right to fix box -->
+        <line x1="490" y1="141" x2="620" y2="141" stroke="#f85149" stroke-width="1.5" marker-end="url(#arr-red)"/>
+        <text x="510" y="136" fill="#f85149" font-family="IBM Plex Mono, monospace" font-size="9">NO</text>
+        <rect x="620" y="126" width="170" height="30" rx="4" fill="#1c0c0c" stroke="#f85149" stroke-width="1"/>
+        <text x="705" y="140" fill="#f85149" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11">Add flows to Solution first</text>
+        <text x="705" y="152" fill="#8b949e" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">then return</text>
+        <!-- Loop back arrow -->
+        <line x1="620" y1="141" x2="600" y2="141" stroke="#f85149" stroke-width="1"/>
+        <line x1="600" y1="141" x2="600" y2="60" stroke="#f85149" stroke-width="1"/>
+        <line x1="600" y1="60" x2="580" y2="60" stroke="#f85149" stroke-width="1"/>
+        <line x1="580" y1="60" x2="580" y2="76" stroke="#f85149" stroke-width="1" marker-end="url(#arr-red)"/>
+
+        <!-- Box: Verify child flows + conn refs -->
+        <rect x="250" y="174" width="350" height="44" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="425" y="193" fill="#e6edf3" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="500">Verify child flows &amp; Connection References</text>
+        <text x="425" y="208" fill="#8b949e" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">Record all Environment Variables + values</text>
+
+        <!-- ===== PHASE 2: EXPORT ===== -->
+        <line x1="425" y1="218" x2="425" y2="242" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Export box -->
+        <rect x="250" y="242" width="350" height="44" rx="4" fill="#0a1628" stroke="#00d4ff" stroke-width="1.5"/>
+        <text x="425" y="261" fill="#00d4ff" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600">Export as UNMANAGED Solution</text>
+        <text x="425" y="275" fill="#8b949e" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">make.powerapps.com → Solutions → Export</text>
+
+        <!-- Decision: Export OK? -->
+        <line x1="425" y1="286" x2="425" y2="300" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+        <polygon points="425,300 490,313 425,326 360,313" fill="#161b22" stroke="#f0a500" stroke-width="1.5"/>
+        <text x="425" y="310" fill="#f0a500" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" font-weight="600">Export OK?</text>
+        <text x="425" y="321" fill="#f0a500" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9">Check .zip saved</text>
+
+        <!-- YES -->
+        <line x1="425" y1="326" x2="425" y2="346" stroke="#39d353" stroke-width="1.5" marker-end="url(#arr-green)"/>
+        <text x="432" y="340" fill="#39d353" font-family="IBM Plex Mono, monospace" font-size="9">YES</text>
+
+        <!-- NO -->
+        <line x1="360" y1="313" x2="180" y2="313" stroke="#f85149" stroke-width="1.5"/>
+        <rect x="100" y="298" width="80" height="30" rx="4" fill="#1c0c0c" stroke="#f85149" stroke-width="1"/>
+        <text x="140" y="313" fill="#f85149" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11">Fix &amp; Retry</text>
+        <text x="112" y="308" fill="#f85149" font-family="IBM Plex Mono, monospace" font-size="9">NO →</text>
+        <line x1="140" y1="298" x2="140" y2="270" stroke="#f85149" stroke-width="1"/>
+        <line x1="140" y1="270" x2="250" y2="270" stroke="#f85149" stroke-width="1" marker-end="url(#arr-red)"/>
+
+        <!-- ===== PHASE 3: TARGET PREP ===== -->
+        <rect x="240" y="346" width="370" height="44" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="425" y="364" fill="#e6edf3" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="500">Create Connections in Thermo Fisher tenant</text>
+        <text x="425" y="379" fill="#8b949e" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">One connection per connector type used in Solution</text>
+
+        <line x1="425" y1="390" x2="425" y2="406" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <rect x="240" y="406" width="370" height="44" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="425" y="424" fill="#e6edf3" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="500">Create data sources in target</text>
+        <text x="425" y="439" fill="#8b949e" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">SharePoint lists, Dataverse tables, custom connectors</text>
+
+        <line x1="425" y1="450" x2="425" y2="466" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <rect x="240" y="466" width="370" height="44" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="425" y="484" fill="#e6edf3" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="500">Prepare Environment Variable values list</text>
+        <text x="425" y="499" fill="#8b949e" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">Schema names + target values ready before import</text>
+
+        <!-- ===== PHASE 4: IMPORT ===== -->
+        <line x1="425" y1="510" x2="425" y2="536" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <rect x="240" y="536" width="370" height="44" rx="4" fill="#0a1628" stroke="#ff6b35" stroke-width="1.5"/>
+        <text x="425" y="554" fill="#ff6b35" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600">Import Solution (.zip) into Target</text>
+        <text x="425" y="569" fill="#8b949e" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">Solutions → Import Solution → Upload zip</text>
+
+        <line x1="425" y1="580" x2="425" y2="596" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Decision: All refs mapped? -->
+        <polygon points="425,596 500,611 425,626 350,611" fill="#161b22" stroke="#f0a500" stroke-width="1.5"/>
+        <text x="425" y="608" fill="#f0a500" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" font-weight="600">All Conn Refs</text>
+        <text x="425" y="620" fill="#f0a500" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9">Mapped?</text>
+
+        <line x1="425" y1="626" x2="425" y2="642" stroke="#39d353" stroke-width="1.5" marker-end="url(#arr-green)"/>
+        <text x="432" y="638" fill="#39d353" font-family="IBM Plex Mono, monospace" font-size="9">YES</text>
+
+        <line x1="350" y1="611" x2="200" y2="611" stroke="#f85149" stroke-width="1.5"/>
+        <rect x="100" y="597" width="100" height="28" rx="4" fill="#1c0c0c" stroke="#f85149" stroke-width="1"/>
+        <text x="150" y="609" fill="#f85149" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">Create missing</text>
+        <text x="150" y="621" fill="#f85149" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">connections</text>
+        <text x="112" y="607" fill="#f85149" font-family="IBM Plex Mono, monospace" font-size="9">NO →</text>
+        <line x1="150" y1="597" x2="150" y2="560" stroke="#f85149" stroke-width="1"/>
+        <line x1="150" y1="560" x2="240" y2="560" stroke="#f85149" stroke-width="1" marker-end="url(#arr-red)"/>
+
+        <!-- Set Env Vars + Enable Flows -->
+        <rect x="240" y="642" width="370" height="36" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="425" y="656" fill="#e6edf3" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="500">Set Environment Variables + Enable Flows</text>
+        <text x="425" y="670" fill="#8b949e" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">Assign owners · Configure machine connections</text>
+
+        <!-- ===== PHASE 5: VALIDATION ===== -->
+        <line x1="425" y1="678" x2="425" y2="730" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <rect x="240" y="730" width="370" height="36" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="425" y="746" fill="#e6edf3" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="500">Run Manual Test — All Flows</text>
+        <text x="425" y="760" fill="#8b949e" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">Check run history · Verify child flows</text>
+
+        <line x1="425" y1="766" x2="425" y2="782" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Final decision -->
+        <polygon points="425,782 495,797 425,812 355,797" fill="#161b22" stroke="#f0a500" stroke-width="1.5"/>
+        <text x="425" y="793" fill="#f0a500" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" font-weight="600">All Tests</text>
+        <text x="425" y="805" fill="#f0a500" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9">Pass?</text>
+
+        <!-- YES to END -->
+        <line x1="425" y1="812" x2="425" y2="832" stroke="#39d353" stroke-width="1.5" marker-end="url(#arr-green)"/>
+        <text x="432" y="826" fill="#39d353" font-family="IBM Plex Mono, monospace" font-size="9">YES</text>
+
+        <!-- NO to Fix -->
+        <line x1="495" y1="797" x2="650" y2="797" stroke="#f85149" stroke-width="1.5"/>
+        <rect x="650" y="783" width="140" height="28" rx="4" fill="#1c0c0c" stroke="#f85149" stroke-width="1"/>
+        <text x="720" y="798" fill="#f85149" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">Fix issue → retest</text>
+        <text x="660" y="793" fill="#f85149" font-family="IBM Plex Mono, monospace" font-size="9">NO →</text>
+        <line x1="720" y1="783" x2="720" y2="748" stroke="#f85149" stroke-width="1"/>
+        <line x1="720" y1="748" x2="610" y2="748" stroke="#f85149" stroke-width="1" marker-end="url(#arr-red)"/>
+
+        <!-- END -->
+        <rect x="320" y="832" width="210" height="38" rx="19" fill="#0a2018" stroke="#39d353" stroke-width="1.5"/>
+        <text x="425" y="850" fill="#39d353" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600">MIGRATION COMPLETE</text>
+        <text x="425" y="864" fill="#8b949e" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">Sign off · Log known issues to backlog</text>
+      </svg>
+    </div>
+
+    <!-- FLOWCHART 2: Desktop Flow / RPA Testing -->
+    <div class="flowchart-wrap">
+      <div class="flowchart-title">Flowchart 2 — RPA / Desktop Flow Testing: HM (Dev) → HMG (Test/Prod)</div>
+      <svg viewBox="0 0 860 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:860px;display:block;margin:0 auto;">
+        <defs>
+          <marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#4a5568"/>
+          </marker>
+          <marker id="a2g" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#39d353"/>
+          </marker>
+          <marker id="a2r" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#f85149"/>
+          </marker>
+          <marker id="a2y" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#f0a500"/>
+          </marker>
+        </defs>
+
+        <!-- Column headers -->
+        <rect x="100" y="10" width="280" height="30" rx="4" fill="rgba(0,212,255,0.07)" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
+        <text x="240" y="29" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600">DEV — HM (Attended)</text>
+
+        <rect x="480" y="10" width="280" height="30" rx="4" fill="rgba(57,211,83,0.07)" stroke="rgba(57,211,83,0.2)" stroke-width="1"/>
+        <text x="620" y="29" text-anchor="middle" fill="#39d353" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600">TEST/PROD — HMG (Unattended)</text>
+
+        <!-- Vertical divider -->
+        <line x1="430" y1="10" x2="430" y2="520" stroke="#1c2230" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+        <!-- === LEFT COLUMN — HM DEV === -->
+        <rect x="120" y="60" width="240" height="40" rx="4" fill="#0a1628" stroke="#00d4ff" stroke-width="1.5"/>
+        <text x="240" y="76" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600">Import Solution to Dev</text>
+        <text x="240" y="91" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">Turn on flows, assign owner</text>
+
+        <line x1="240" y1="100" x2="240" y2="118" stroke="#4a5568" stroke-width="1.5" marker-end="url(#a2)"/>
+
+        <rect x="120" y="118" width="240" height="40" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="240" y="134" text-anchor="middle" fill="#e6edf3" font-family="IBM Plex Sans, sans-serif" font-size="12">Connect Desktop Flow to HM</text>
+        <text x="240" y="149" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">Portal: Monitor → Machines</text>
+
+        <line x1="240" y1="158" x2="240" y2="176" stroke="#4a5568" stroke-width="1.5" marker-end="url(#a2)"/>
+
+        <rect x="120" y="176" width="240" height="40" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="240" y="192" text-anchor="middle" fill="#e6edf3" font-family="IBM Plex Sans, sans-serif" font-size="12">Run attended test manually</text>
+        <text x="240" y="207" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">Verify UI selectors on HM apps</text>
+
+        <line x1="240" y1="216" x2="240" y2="234" stroke="#4a5568" stroke-width="1.5" marker-end="url(#a2)"/>
+
+        <!-- Decision left -->
+        <polygon points="240,234 305,248 240,262 175,248" fill="#161b22" stroke="#f0a500" stroke-width="1.5"/>
+        <text x="240" y="244" text-anchor="middle" fill="#f0a500" font-family="IBM Plex Mono, monospace" font-size="10">Flow OK</text>
+        <text x="240" y="256" text-anchor="middle" fill="#f0a500" font-family="IBM Plex Mono, monospace" font-size="9">on HM?</text>
+
+        <!-- NO left loop -->
+        <line x1="175" y1="248" x2="110" y2="248" stroke="#f85149" stroke-width="1.5"/>
+        <line x1="110" y1="248" x2="110" y2="186" stroke="#f85149" stroke-width="1.5"/>
+        <line x1="110" y1="186" x2="120" y2="186" stroke="#f85149" stroke-width="1.5" marker-end="url(#a2r)"/>
+        <text x="104" y="222" fill="#f85149" font-family="IBM Plex Mono, monospace" font-size="9">NO</text>
+
+        <!-- YES down left -->
+        <line x1="240" y1="262" x2="240" y2="280" stroke="#39d353" stroke-width="1.5" marker-end="url(#a2g)"/>
+        <text x="248" y="274" fill="#39d353" font-family="IBM Plex Mono, monospace" font-size="9">YES</text>
+
+        <rect x="120" y="280" width="240" height="40" rx="4" fill="#0a2018" stroke="#39d353" stroke-width="1.5"/>
+        <text x="240" y="296" text-anchor="middle" fill="#39d353" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600">Dev sign-off complete</text>
+        <text x="240" y="311" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">Promote to Test environment</text>
+
+        <!-- Arrow across to right column -->
+        <line x1="360" y1="300" x2="478" y2="300" stroke="#f0a500" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a2y)"/>
+        <text x="412" y="294" fill="#f0a500" font-family="IBM Plex Mono, monospace" font-size="9" text-anchor="middle">PROMOTE</text>
+
+        <!-- === RIGHT COLUMN — HMG TEST === -->
+        <rect x="500" y="60" width="240" height="40" rx="4" fill="#0a2018" stroke="#39d353" stroke-width="1.5"/>
+        <text x="620" y="76" text-anchor="middle" fill="#39d353" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600">Import to Test (Unmanaged)</text>
+        <text x="620" y="91" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">Map conn refs + set env vars</text>
+
+        <line x1="620" y1="100" x2="620" y2="118" stroke="#4a5568" stroke-width="1.5" marker-end="url(#a2)"/>
+
+        <rect x="500" y="118" width="240" height="40" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="620" y="134" text-anchor="middle" fill="#e6edf3" font-family="IBM Plex Sans, sans-serif" font-size="12">Connect Desktop Flow to HMG</text>
+        <text x="620" y="149" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">Verify HMG has machines available</text>
+
+        <line x1="620" y1="158" x2="620" y2="176" stroke="#4a5568" stroke-width="1.5" marker-end="url(#a2)"/>
+
+        <rect x="500" y="176" width="240" height="40" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="620" y="192" text-anchor="middle" fill="#e6edf3" font-family="IBM Plex Sans, sans-serif" font-size="12">Trigger via actual trigger (unattended)</text>
+        <text x="620" y="207" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">No manual trigger — simulate production</text>
+
+        <line x1="620" y1="216" x2="620" y2="234" stroke="#4a5568" stroke-width="1.5" marker-end="url(#a2)"/>
+
+        <!-- Decision right -->
+        <polygon points="620,234 685,248 620,262 555,248" fill="#161b22" stroke="#f0a500" stroke-width="1.5"/>
+        <text x="620" y="244" text-anchor="middle" fill="#f0a500" font-family="IBM Plex Mono, monospace" font-size="10">3 runs pass</text>
+        <text x="620" y="256" text-anchor="middle" fill="#f0a500" font-family="IBM Plex Mono, monospace" font-size="9">on HMG?</text>
+
+        <!-- NO right loop -->
+        <line x1="685" y1="248" x2="760" y2="248" stroke="#f85149" stroke-width="1.5"/>
+        <line x1="760" y1="248" x2="760" y2="186" stroke="#f85149" stroke-width="1.5"/>
+        <line x1="760" y1="186" x2="740" y2="186" stroke="#f85149" stroke-width="1.5" marker-end="url(#a2r)"/>
+        <text x="762" y="222" fill="#f85149" font-family="IBM Plex Mono, monospace" font-size="9">NO</text>
+        <!-- Fix note -->
+        <rect x="760" y="200" width="80" height="24" rx="3" fill="#1c0c0c" stroke="#f85149" stroke-width="0.8"/>
+        <text x="800" y="213" text-anchor="middle" fill="#f85149" font-family="IBM Plex Sans, sans-serif" font-size="9">Fix + Redeploy</text>
+
+        <!-- YES down right -->
+        <line x1="620" y1="262" x2="620" y2="280" stroke="#39d353" stroke-width="1.5" marker-end="url(#a2g)"/>
+        <text x="628" y="274" fill="#39d353" font-family="IBM Plex Mono, monospace" font-size="9">YES</text>
+
+        <rect x="500" y="280" width="240" height="40" rx="4" fill="#0a2018" stroke="#39d353" stroke-width="1.5"/>
+        <text x="620" y="296" text-anchor="middle" fill="#39d353" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600">Test sign-off complete</text>
+        <text x="620" y="311" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">Promote to Production (Managed)</text>
+
+        <line x1="620" y1="320" x2="620" y2="338" stroke="#4a5568" stroke-width="1.5" marker-end="url(#a2)"/>
+
+        <!-- Production box -->
+        <rect x="480" y="338" width="280" height="50" rx="4" fill="#0a1628" stroke="#ff6b35" stroke-width="1.5"/>
+        <text x="620" y="357" text-anchor="middle" fill="#ff6b35" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600">Deploy to Production as MANAGED</text>
+        <text x="620" y="373" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">HMG confirmed · Monitor first 2 days</text>
+        <text x="620" y="384" text-anchor="middle" fill="#4a5568" font-family="IBM Plex Sans, sans-serif" font-size="10">Keep source live until stable</text>
+      </svg>
+    </div>
+
+    <!-- FLOWCHART 3: Connection Reference Decision -->
+    <div class="flowchart-wrap">
+      <div class="flowchart-title">Flowchart 3 — Connection Reference: Fix or Fail Decision</div>
+      <svg viewBox="0 0 860 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:860px;display:block;margin:0 auto;">
+        <defs>
+          <marker id="a3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#4a5568"/>
+          </marker>
+          <marker id="a3g" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#39d353"/>
+          </marker>
+          <marker id="a3r" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#f85149"/>
+          </marker>
+        </defs>
+
+        <!-- START -->
+        <rect x="330" y="20" width="200" height="36" rx="18" fill="#0a1628" stroke="#00d4ff" stroke-width="1.5"/>
+        <text x="430" y="38" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600">Flow fails at runtime</text>
+        <text x="430" y="50" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">Check run history</text>
+
+        <line x1="430" y1="56" x2="430" y2="76" stroke="#4a5568" stroke-width="1.5" marker-end="url(#a3)"/>
+
+        <!-- Q1 -->
+        <polygon points="430,76 520,92 430,108 340,92" fill="#161b22" stroke="#f0a500" stroke-width="1.5"/>
+        <text x="430" y="88" text-anchor="middle" fill="#f0a500" font-family="IBM Plex Mono, monospace" font-size="10">Auth / Connection</text>
+        <text x="430" y="100" text-anchor="middle" fill="#f0a500" font-family="IBM Plex Mono, monospace" font-size="9">error?</text>
+
+        <!-- YES right -->
+        <line x1="520" y1="92" x2="610" y2="92" stroke="#39d353" stroke-width="1.5" marker-end="url(#a3g)"/>
+        <text x="555" y="86" fill="#39d353" font-family="IBM Plex Mono, monospace" font-size="9" text-anchor="middle">YES</text>
+
+        <rect x="610" y="76" width="200" height="32" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="710" y="90" text-anchor="middle" fill="#e6edf3" font-family="IBM Plex Sans, sans-serif" font-size="11">Go to Solutions →</text>
+        <text x="710" y="103" text-anchor="middle" fill="#e6edf3" font-family="IBM Plex Sans, sans-serif" font-size="11">Connection References</text>
+
+        <line x1="710" y1="108" x2="710" y2="126" stroke="#4a5568" stroke-width="1.5" marker-end="url(#a3)"/>
+
+        <rect x="610" y="126" width="200" height="32" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="710" y="140" text-anchor="middle" fill="#e6edf3" font-family="IBM Plex Sans, sans-serif" font-size="11">Select correct connection</text>
+        <text x="710" y="153" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">or create new one</text>
+
+        <line x1="710" y1="158" x2="710" y2="180" stroke="#4a5568" stroke-width="1.5" marker-end="url(#a3)"/>
+
+        <rect x="610" y="180" width="200" height="32" rx="4" fill="#0a2018" stroke="#39d353" stroke-width="1.5"/>
+        <text x="710" y="196" text-anchor="middle" fill="#39d353" font-family="IBM Plex Sans, sans-serif" font-size="11" font-weight="600">Retest flow</text>
+        <text x="710" y="208" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">Should now succeed</text>
+
+        <!-- NO down (not conn ref error) -->
+        <line x1="430" y1="108" x2="430" y2="126" stroke="#f85149" stroke-width="1.5" marker-end="url(#a3r)"/>
+        <text x="438" y="120" fill="#f85149" font-family="IBM Plex Mono, monospace" font-size="9">NO</text>
+
+        <!-- Q2 -->
+        <polygon points="430,126 520,142 430,158 340,142" fill="#161b22" stroke="#f0a500" stroke-width="1.5"/>
+        <text x="430" y="138" text-anchor="middle" fill="#f0a500" font-family="IBM Plex Mono, monospace" font-size="10">Env Variable</text>
+        <text x="430" y="150" text-anchor="middle" fill="#f0a500" font-family="IBM Plex Mono, monospace" font-size="9">null or wrong?</text>
+
+        <!-- YES2 right -->
+        <line x1="520" y1="142" x2="610" y2="142" stroke="#39d353" stroke-width="1.5" marker-end="url(#a3g)"/>
+        <text x="555" y="136" fill="#39d353" font-family="IBM Plex Mono, monospace" font-size="9" text-anchor="middle">YES</text>
+
+        <!-- No double arrow - handled by column above -->
+
+        <!-- NO2 down -->
+        <line x1="430" y1="158" x2="430" y2="176" stroke="#f85149" stroke-width="1.5" marker-end="url(#a3r)"/>
+        <text x="438" y="170" fill="#f85149" font-family="IBM Plex Mono, monospace" font-size="9">NO</text>
+
+        <!-- Q3 -->
+        <polygon points="430,176 520,192 430,208 340,192" fill="#161b22" stroke="#f0a500" stroke-width="1.5"/>
+        <text x="430" y="188" text-anchor="middle" fill="#f0a500" font-family="IBM Plex Mono, monospace" font-size="10">Machine / RPA</text>
+        <text x="430" y="200" text-anchor="middle" fill="#f0a500" font-family="IBM Plex Mono, monospace" font-size="9">not found?</text>
+
+        <!-- YES3 left -->
+        <line x1="340" y1="192" x2="240" y2="192" stroke="#39d353" stroke-width="1.5" marker-end="url(#a3g)"/>
+        <text x="285" y="186" fill="#39d353" font-family="IBM Plex Mono, monospace" font-size="9" text-anchor="middle">YES</text>
+        <rect x="100" y="176" width="140" height="32" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="170" y="190" text-anchor="middle" fill="#e6edf3" font-family="IBM Plex Sans, sans-serif" font-size="11">Update machine</text>
+        <text x="170" y="203" text-anchor="middle" fill="#e6edf3" font-family="IBM Plex Sans, sans-serif" font-size="11">connection reference</text>
+
+        <!-- NO3 down -->
+        <line x1="430" y1="208" x2="430" y2="226" stroke="#f85149" stroke-width="1.5" marker-end="url(#a3r)"/>
+        <text x="438" y="220" fill="#f85149" font-family="IBM Plex Mono, monospace" font-size="9">NO</text>
+
+        <rect x="280" y="226" width="300" height="32" rx="4" fill="#1c0c0c" stroke="#f85149" stroke-width="1"/>
+        <text x="430" y="240" text-anchor="middle" fill="#f85149" font-family="IBM Plex Sans, sans-serif" font-size="11">Check run history details</text>
+        <text x="430" y="253" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">Identify failing action → fix specific step</text>
+
+        <line x1="430" y1="258" x2="430" y2="276" stroke="#4a5568" stroke-width="1.5" marker-end="url(#a3)"/>
+
+        <rect x="280" y="276" width="300" height="36" rx="18" fill="#0a2018" stroke="#39d353" stroke-width="1.5"/>
+        <text x="430" y="293" text-anchor="middle" fill="#39d353" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600">Retest → Confirm Succeeded</text>
+        <text x="430" y="306" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">Return to validation checklist</text>
+
+        <!-- Note for Q2 YES fix (edit env var) -->
+        <rect x="610" y="126" width="200" height="32" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
+        <text x="710" y="140" text-anchor="middle" fill="#e6edf3" font-family="IBM Plex Sans, sans-serif" font-size="11">Solution → Environment</text>
+        <text x="710" y="153" text-anchor="middle" fill="#e6edf3" font-family="IBM Plex Sans, sans-serif" font-size="11">Variables → Edit value</text>
+      </svg>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <hr class="divider">
+  <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px 0 32px;">
+    <div>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);">CRG → Thermo Fisher Scientific Migration</span><br>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);">Power Platform Lift &amp; Shift Survival Guide</span>
+    </div>
+    <div style="text-align:right;">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);">Strategy: Move First. Fix Later.</span><br>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--accent);">Version 1.0 — For Developer Use Only</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
