@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lift & Shift Survival Guide — CRG → Thermo Fisher Migration</title>
+<title>Power Automate Migration Guide - CRG → Thermo Fisher Migration</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#00d4ff">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -477,7 +477,7 @@
   <div class="cover-inner">
     <div class="cover-tag">Internal Migration Reference</div>
     <h1>Lift &amp; Shift<br><span>Survival Guide</span></h1>
-    <p class="cover-sub">Power Platform Tenant Migration — CRG → Thermo Fisher Scientific</p>
+    <p class="cover-sub">Power Platform Tenant Migration - CRG → Thermo Fisher Scientific</p>
     <div class="cover-meta">
       <div class="cover-meta-item">
         <span class="cover-meta-label">Source Tenant</span>
@@ -489,7 +489,7 @@
       </div>
       <div class="cover-meta-item">
         <span class="cover-meta-label">Strategy</span>
-        <span class="cover-meta-value">Lift &amp; Shift — No Redesign</span>
+        <span class="cover-meta-value">Lift &amp; Shift - No Redesign</span>
       </div>
       <div class="cover-meta-item">
         <span class="cover-meta-label">Dev Environment</span>
@@ -509,10 +509,10 @@
   <div class="toc">
     <div class="toc-title">Contents</div>
     <div class="toc-grid">
-      <div class="toc-item"><span class="toc-num">01</span> Survival Checklist — Must-Haves Only</div>
+      <div class="toc-item"><span class="toc-num">01</span> Survival Checklist - Must-Haves Only</div>
       <div class="toc-item"><span class="toc-num">02</span> Explicit Approval to Ignore Best Practices</div>
-      <div class="toc-item"><span class="toc-num">03a</span> Documentation — Must-Haves</div>
-      <div class="toc-item"><span class="toc-num">03b</span> Documentation — Good-to-Haves (Optional)</div>
+      <div class="toc-item"><span class="toc-num">03a</span> Documentation - Must-Haves</div>
+      <div class="toc-item"><span class="toc-num">03b</span> Documentation - Good-to-Haves (Optional)</div>
       <div class="toc-item"><span class="toc-num">03c</span> Testing Strategy</div>
       <div class="toc-item"><span class="toc-num">04</span> Migration Flowcharts</div>
     </div>
@@ -524,7 +524,7 @@
       <div class="section-number">01</div>
       <div class="section-title-block">
         <h2>Lift &amp; Shift Survival Checklist</h2>
-        <p>Must-haves only — follow these steps in order, every time</p>
+        <p>Must-haves only - follow these steps in order, every time</p>
       </div>
     </div>
 
@@ -537,19 +537,19 @@
     <div class="phase">
       <div class="phase-header">
         <div class="phase-icon blue">01</div>
-        <div class="phase-title">Pre-Export Checks — Do This Before Touching the Source</div>
+        <div class="phase-title">Pre-Export Checks - Do This Before Touching the Source</div>
         <span class="phase-subtitle">Source Tenant · CRG</span>
       </div>
       <div class="phase-body">
         <ul class="step-list">
           <li>Confirm the flow exists inside a <strong>named, non-default Solution</strong>. If it lives in the Default Solution, add it to a proper Solution first.</li>
           <li>Verify all <strong>child flows</strong> (flows called by this flow) are also inside the same Solution.</li>
-          <li>Check that every connector in the flow has a <strong>Connection Reference</strong> — not a hardcoded personal connection.</li>
+          <li>Check that every connector in the flow has a <strong>Connection Reference</strong> - not a hardcoded personal connection.</li>
           <li>Open each Connection Reference and note the connector type (SharePoint, Teams, Dataverse, HTTP, etc.). You will need to recreate these in the target.</li>
           <li>List all <strong>Environment Variables</strong> used by the flow. Record their internal names (Schema names) and their current values.</li>
           <li>If the flow uses any <strong>custom connectors</strong>, export those separately and note their endpoints and authentication type.</li>
           <li>Confirm the Solution contains <strong>no Flows in a broken or suspended state</strong>. Fix or remove them before export.</li>
-          <li>If flows reference <strong>SharePoint lists, Dataverse tables, or other data sources</strong> — record the exact URLs or table names. These must exist in the target tenant before import.</li>
+          <li>If flows reference <strong>SharePoint lists, Dataverse tables, or other data sources</strong> - record the exact URLs or table names. These must exist in the target tenant before import.</li>
         </ul>
       </div>
     </div>
@@ -560,7 +560,7 @@
     <div class="phase">
       <div class="phase-header">
         <div class="phase-icon blue">02</div>
-        <div class="phase-title">Export as Unmanaged — From CRG Tenant</div>
+        <div class="phase-title">Export as Unmanaged - From CRG Tenant</div>
         <span class="phase-subtitle">Source Tenant · CRG</span>
       </div>
       <div class="phase-body">
@@ -568,12 +568,12 @@
           <li>Go to <strong>make.powerapps.com</strong> in the CRG tenant.</li>
           <li>Navigate to <strong>Solutions</strong> in the left nav. Select your Solution.</li>
           <li>Click <strong>Export Solution</strong>.</li>
-          <li>Select <strong>Unmanaged</strong> — always use Unmanaged when you need to edit or re-import later. Never use Managed for migration unless the target environment is Production and you intend no further edits there.</li>
+          <li>Select <strong>Unmanaged</strong> - always use Unmanaged when you need to edit or re-import later. Never use Managed for migration unless the target environment is Production and you intend no further edits there.</li>
           <li>Click <strong>Next</strong>, then <strong>Export</strong>. Save the <code>.zip</code> file to a known location.</li>
           <li>Keep the zip file name unchanged. Do not rename it.</li>
         </ul>
         <div class="callout info">
-          <span class="callout-label">Managed vs Unmanaged — Quick Rule</span>
+          <span class="callout-label">Managed vs Unmanaged - Quick Rule</span>
           Use <strong>Unmanaged</strong> in Dev and Test (you can edit after import). Use <strong>Managed</strong> in Production (locked down, cannot edit). For this migration, start with Unmanaged in Dev to validate first.
         </div>
       </div>
@@ -637,7 +637,7 @@
       </div>
       <div class="phase-body">
         <ul class="step-list">
-          <li>Open the imported Solution. Check each flow — they will likely be <strong>turned off</strong> by default after import.</li>
+          <li>Open the imported Solution. Check each flow - they will likely be <strong>turned off</strong> by default after import.</li>
           <li>Open each flow and click <strong>Turn on</strong>.</li>
           <li>If a flow is owned by a user who does not exist in the Thermo Fisher tenant, <strong>reassign the owner</strong>. Go to the flow details and use the "Run only users" or ownership settings.</li>
           <li>For flows using <strong>service accounts</strong>, ensure the service account credentials are active in the target tenant and the connections are authenticated.</li>
@@ -652,14 +652,14 @@
     <div class="phase">
       <div class="phase-header">
         <div class="phase-icon green">06</div>
-        <div class="phase-title">Post-Import Validation — Minimum Required</div>
+        <div class="phase-title">Post-Import Validation - Minimum Required</div>
         <span class="phase-subtitle">Target Tenant · Thermo Fisher</span>
       </div>
       <div class="phase-body">
         <ul class="step-list">
           <li>Open each flow in the editor. Visually inspect that all actions load without red error banners.</li>
           <li>Trigger the flow manually once using <strong>Test → Manually</strong>.</li>
-          <li>Check the <strong>Run History</strong> — confirm the run shows "Succeeded" end-to-end.</li>
+          <li>Check the <strong>Run History</strong> - confirm the run shows "Succeeded" end-to-end.</li>
           <li>If any step shows a failure: open that step, check if the connection reference is properly mapped, and verify the target resource (SharePoint list, table, etc.) exists.</li>
           <li>For Desktop flows: run a test execution from the <strong>Power Automate Desktop console</strong> on the target machine.</li>
           <li>Confirm that <strong>all child flows</strong> also completed successfully during the parent flow run.</li>
@@ -669,7 +669,7 @@
 
     <!-- COMMON FAILURES -->
     <hr class="divider">
-    <h3 style="font-size:15px; margin-bottom:16px; color:var(--text);">Common Failure Points — Know These Before You Start</h3>
+    <h3 style="font-size:15px; margin-bottom:16px; color:var(--text);">Common Failure Points - Know These Before You Start</h3>
     <table class="data-table">
       <thead>
         <tr>
@@ -700,7 +700,7 @@
           <td>Go back to source, add child flow to Solution, re-export</td>
         </tr>
         <tr>
-          <td>Desktop flow fails — machine not found</td>
+          <td>Desktop flow fails - machine not found</td>
           <td>Machine connection references CRG machine</td>
           <td>Update the Desktop flow's machine connection to a Thermo Fisher registered machine</td>
         </tr>
@@ -754,14 +754,14 @@
       <div class="col-block">
         <h4>🚫 You Must Not Ignore These</h4>
         <ul class="step-list">
-          <li><strong>Hardcoded tenant-specific URLs</strong> (CRG SharePoint URLs inside flow actions — these must be updated)</li>
-          <li><strong>Personal connections</strong> used directly — these will not work in the target tenant for another user</li>
-          <li><strong>Missing Connection References</strong> — flows using direct connections instead of references will break</li>
-          <li><strong>Flows outside a Solution</strong> — cannot be exported properly</li>
-          <li><strong>Child flows missing from Solution</strong> — parent flow will fail at the child call step</li>
-          <li><strong>Machine/machine group references</strong> tied to CRG — Desktop flows will not run</li>
-          <li><strong>Missing Environment Variables</strong> with no default value — flow will error immediately</li>
-          <li><strong>Expired or personal credentials</strong> in connections — must be refreshed in target</li>
+          <li><strong>Hardcoded tenant-specific URLs</strong> (CRG SharePoint URLs inside flow actions - these must be updated)</li>
+          <li><strong>Personal connections</strong> used directly - these will not work in the target tenant for another user</li>
+          <li><strong>Missing Connection References</strong> - flows using direct connections instead of references will break</li>
+          <li><strong>Flows outside a Solution</strong> - cannot be exported properly</li>
+          <li><strong>Child flows missing from Solution</strong> - parent flow will fail at the child call step</li>
+          <li><strong>Machine/machine group references</strong> tied to CRG - Desktop flows will not run</li>
+          <li><strong>Missing Environment Variables</strong> with no default value - flow will error immediately</li>
+          <li><strong>Expired or personal credentials</strong> in connections - must be refreshed in target</li>
         </ul>
       </div>
     </div>
@@ -777,7 +777,7 @@
     <div class="section-header">
       <div class="section-number">03a</div>
       <div class="section-title-block">
-        <h2>Documentation — Must-Haves</h2>
+        <h2>Documentation - Must-Haves</h2>
         <p>Step-by-step deployment process and migration reference</p>
       </div>
     </div>
@@ -790,14 +790,14 @@
       </div>
       <div class="phase-body">
         <ul class="step-list">
-          <li><strong>Step 1 — Inventory:</strong> List every flow being migrated. Record: flow name, solution name, connectors used, environment variables, child flows.</li>
-          <li><strong>Step 2 — Source preparation:</strong> Ensure all components are inside a named Solution in CRG. Fix broken flows or exclude them intentionally.</li>
-          <li><strong>Step 3 — Export:</strong> Export Solution as Unmanaged from CRG.</li>
-          <li><strong>Step 4 — Target prep:</strong> Create connections, data sources, and environment variable placeholders in Thermo Fisher tenant.</li>
-          <li><strong>Step 5 — Import:</strong> Import Solution, map connection references, set environment variable values.</li>
-          <li><strong>Step 6 — Enable:</strong> Turn on flows, assign owners, configure machine connections for RPA.</li>
-          <li><strong>Step 7 — Test:</strong> Run test cases per the Testing Strategy (Section 03c).</li>
-          <li><strong>Step 8 — Sign-off:</strong> Developer confirms all test cases pass. Document any known issues for backlog.</li>
+          <li><strong>Step 1 - Inventory:</strong> List every flow being migrated. Record: flow name, solution name, connectors used, environment variables, child flows.</li>
+          <li><strong>Step 2 - Source preparation:</strong> Ensure all components are inside a named Solution in CRG. Fix broken flows or exclude them intentionally.</li>
+          <li><strong>Step 3 - Export:</strong> Export Solution as Unmanaged from CRG.</li>
+          <li><strong>Step 4 - Target prep:</strong> Create connections, data sources, and environment variable placeholders in Thermo Fisher tenant.</li>
+          <li><strong>Step 5 - Import:</strong> Import Solution, map connection references, set environment variable values.</li>
+          <li><strong>Step 6 - Enable:</strong> Turn on flows, assign owners, configure machine connections for RPA.</li>
+          <li><strong>Step 7 - Test:</strong> Run test cases per the Testing Strategy (Section 03c).</li>
+          <li><strong>Step 8 - Sign-off:</strong> Developer confirms all test cases pass. Document any known issues for backlog.</li>
         </ul>
       </div>
     </div>
@@ -817,7 +817,7 @@
             <tr><td>Cloud Flows (parent)</td><td><span class="tag green">INCLUDE</span></td><td>Always</td></tr>
             <tr><td>Child Flows</td><td><span class="tag green">INCLUDE</span></td><td>Must be in same Solution as parent</td></tr>
             <tr><td>Desktop Flows</td><td><span class="tag green">INCLUDE</span></td><td>Include all RPA flows called by cloud flows</td></tr>
-            <tr><td>Connection References</td><td><span class="tag green">INCLUDE</span></td><td>Mandatory — do not remove even if they look unused</td></tr>
+            <tr><td>Connection References</td><td><span class="tag green">INCLUDE</span></td><td>Mandatory - do not remove even if they look unused</td></tr>
             <tr><td>Environment Variables</td><td><span class="tag green">INCLUDE</span></td><td>Include variable definitions; set values after import</td></tr>
             <tr><td>Custom Connectors</td><td><span class="tag green">INCLUDE</span></td><td>Export and import separately before the main Solution</td></tr>
             <tr><td>Canvas Apps (if linked)</td><td><span class="tag yellow">CONDITIONAL</span></td><td>Include only if the flow is triggered by or tightly coupled to the app</td></tr>
@@ -839,7 +839,7 @@
           <li>Environment Variables travel with the Solution export as <strong>definitions only</strong>. Values are not exported by default (this is by design in Power Platform).</li>
           <li>During import, the wizard will prompt you to set each variable value. <strong>Do not skip this.</strong></li>
           <li>If you have many variables, prepare a simple text file listing each variable Schema Name and its target value before you start the import.</li>
-          <li>If a variable has a <strong>default value</strong> set in the definition, that default will be used if you skip setting a value — verify that default is still valid for the target tenant.</li>
+          <li>If a variable has a <strong>default value</strong> set in the definition, that default will be used if you skip setting a value - verify that default is still valid for the target tenant.</li>
           <li>To update an environment variable after import, go to: <strong>Solutions → [Your Solution] → Environment Variables → edit the value</strong>.</li>
           <li>Never hardcode values inside flow actions to work around missing variables. Update the variable instead.</li>
         </ul>
@@ -856,7 +856,7 @@
     <div class="phase">
       <div class="phase-header">
         <div class="phase-icon blue">D</div>
-        <div class="phase-title">Managed vs Unmanaged — Decision Rules</div>
+        <div class="phase-title">Managed vs Unmanaged - Decision Rules</div>
       </div>
       <div class="phase-body">
         <table class="data-table">
@@ -892,16 +892,16 @@
     <div class="phase">
       <div class="phase-header">
         <div class="phase-icon blue">E</div>
-        <div class="phase-title">Connection Reference Mapping — Step by Step</div>
+        <div class="phase-title">Connection Reference Mapping - Step by Step</div>
       </div>
       <div class="phase-body">
         <ul class="step-list">
           <li>Before import: go to <strong>Data → Connections</strong> in the Thermo Fisher tenant and create one connection per connector type used in the Solution (SharePoint, Outlook, Teams, Dataverse, etc.).</li>
-          <li>Authenticate each connection with the correct <strong>service account</strong> — not your personal account — unless the flow is designed for personal use.</li>
+          <li>Authenticate each connection with the correct <strong>service account</strong> - not your personal account - unless the flow is designed for personal use.</li>
           <li>During import: the wizard shows a list of Connection References. Each reference has a dropdown. Select the matching connection you created.</li>
           <li>If a connection reference is left as "None", the flow will import but will fail when it tries to use that connector at runtime.</li>
           <li>After import: you can verify and update connection reference mapping by going to <strong>Solutions → [Your Solution] → Connection References</strong>.</li>
-          <li>If multiple flows share the same connector type, they should share one Connection Reference — do not create separate references for the same connector.</li>
+          <li>If multiple flows share the same connector type, they should share one Connection Reference - do not create separate references for the same connector.</li>
         </ul>
       </div>
     </div>
@@ -910,7 +910,7 @@
     <div class="phase">
       <div class="phase-header">
         <div class="phase-icon green">F</div>
-        <div class="phase-title">Minimum Validation Checklist — Before Handoff</div>
+        <div class="phase-title">Minimum Validation Checklist - Before Handoff</div>
       </div>
       <div class="phase-body">
         <ul class="checklist">
@@ -920,7 +920,7 @@
           <li>All Environment Variables set to target values</li>
           <li>All flows turned on</li>
           <li>Flow ownership assigned to correct account</li>
-          <li>Manual test run completed — status shows "Succeeded"</li>
+          <li>Manual test run completed - status shows "Succeeded"</li>
           <li>All child flows confirmed executed during parent test run</li>
           <li>RPA: Desktop flow test completed on target machine / machine group</li>
           <li>No broken references in flow editor (no red action blocks)</li>
@@ -935,13 +935,13 @@
     <div class="section-header">
       <div class="section-number">03b</div>
       <div class="section-title-block">
-        <h2>Documentation — Good-to-Haves</h2>
-        <p>Post-migration improvements — do not block migration on these</p>
+        <h2>Documentation - Good-to-Haves</h2>
+        <p>Post-migration improvements - do not block migration on these</p>
       </div>
     </div>
 
     <div class="optional-banner">
-      ⏱ OPTIONAL — Post-Migration Only. None of the items below are required for the flow to run. Complete these after successful migration and sign-off.
+      ⏱ OPTIONAL - Post-Migration Only. None of the items below are required for the flow to run. Complete these after successful migration and sign-off.
     </div>
 
     <div class="two-col">
@@ -995,7 +995,7 @@
       <div class="section-number">03c</div>
       <div class="section-title-block">
         <h2>Testing Strategy</h2>
-        <p>What to test, where, and how — HMs for Dev, HMGs for Test and Production</p>
+        <p>What to test, where, and how - HMs for Dev, HMGs for Test and Production</p>
       </div>
     </div>
 
@@ -1003,7 +1003,7 @@
     <div class="phase">
       <div class="phase-header">
         <div class="phase-icon yellow">A</div>
-        <div class="phase-title">HMs vs HMGs — When to Use Each</div>
+        <div class="phase-title">HMs vs HMGs - When to Use Each</div>
       </div>
       <div class="phase-body">
         <table class="data-table">
@@ -1039,9 +1039,9 @@
         <ul class="step-list">
           <li>Trigger the flow manually and step through each action in the run history.</li>
           <li>Verify the Desktop flow launches and interacts with the correct application on the HM.</li>
-          <li>Test with real credentials — confirm the service account can authenticate to each target system.</li>
+          <li>Test with real credentials - confirm the service account can authenticate to each target system.</li>
           <li>Validate that all Environment Variable values resolve correctly at runtime.</li>
-          <li>Run the flow through a complete happy-path scenario — no shortcuts or partial runs.</li>
+          <li>Run the flow through a complete happy-path scenario - no shortcuts or partial runs.</li>
           <li>Test error scenarios: wrong input, unavailable resource, timeout. Confirm the flow handles them without hanging.</li>
           <li>Confirm child flows are triggered and return the expected outputs to the parent.</li>
           <li>Check the flow run history for any warnings even on a "Succeeded" run.</li>
@@ -1059,11 +1059,11 @@
       <div class="phase-body">
         <ul class="step-list">
           <li>Confirm the flow can be triggered without human interaction (scheduled or event-based trigger).</li>
-          <li>Verify the HMG has at least one available machine at the time of execution — check the machine group capacity in the Power Automate portal.</li>
+          <li>Verify the HMG has at least one available machine at the time of execution - check the machine group capacity in the Power Automate portal.</li>
           <li>Run the flow via its actual trigger (not manual test) to simulate production conditions.</li>
-          <li>Confirm credentials stored for the HMG are valid — test a login via the machine group directly if possible.</li>
-          <li>Validate that application selectors in the Desktop flow work on the HMG — UI elements sometimes behave differently on non-persistent machines.</li>
-          <li>Check that no step requires interactive input (pop-up dialogs, MFA prompts) — these will cause unattended runs to hang.</li>
+          <li>Confirm credentials stored for the HMG are valid - test a login via the machine group directly if possible.</li>
+          <li>Validate that application selectors in the Desktop flow work on the HMG - UI elements sometimes behave differently on non-persistent machines.</li>
+          <li>Check that no step requires interactive input (pop-up dialogs, MFA prompts) - these will cause unattended runs to hang.</li>
           <li>Confirm run history in Test environment shows consistent results over multiple runs, not just one.</li>
         </ul>
         <div class="callout warn">
@@ -1085,7 +1085,7 @@
             <tr><th>#</th><th>Test Case</th><th>Pass Criteria</th><th>Env</th></tr>
           </thead>
           <tbody>
-            <tr><td>TC01</td><td>Manual trigger — full happy path</td><td>Run status = Succeeded, output correct</td><td>Dev / HM</td></tr>
+            <tr><td>TC01</td><td>Manual trigger - full happy path</td><td>Run status = Succeeded, output correct</td><td>Dev / HM</td></tr>
             <tr><td>TC02</td><td>All child flows execute</td><td>Each child flow shows Succeeded in run history</td><td>Dev / HM</td></tr>
             <tr><td>TC03</td><td>Connection reference works</td><td>No auth errors on any connector action</td><td>Dev / HM</td></tr>
             <tr><td>TC04</td><td>Environment variables resolve</td><td>No null/blank variable errors at runtime</td><td>Dev / HM</td></tr>
@@ -1106,7 +1106,7 @@
       </div>
       <div class="phase-body">
         <ul class="step-list">
-          <li><strong>Connections:</strong> Go to <strong>Data → Connections</strong>. Each connection should show a green status. A red warning icon means the credential is expired or invalid — click it and re-authenticate.</li>
+          <li><strong>Connections:</strong> Go to <strong>Data → Connections</strong>. Each connection should show a green status. A red warning icon means the credential is expired or invalid - click it and re-authenticate.</li>
           <li><strong>Service Account Credentials:</strong> Confirm the service account password has not expired. Confirm it is not blocked by Conditional Access policies in the Thermo Fisher tenant.</li>
           <li><strong>SharePoint / Dataverse:</strong> Open the target list or table in a browser with the service account. If you can't read/write manually, the flow won't be able to either.</li>
           <li><strong>Custom Connectors:</strong> Test the connector directly via the test tab in the Custom Connector editor. Confirm the endpoint is reachable from the Thermo Fisher tenant.</li>
@@ -1132,19 +1132,19 @@
 
   </div>
 
-  <!-- ═══════════════════════════════════ SECTION 4 — FLOWCHARTS ═══════════════════════════════════ -->
+  <!-- ═══════════════════════════════════ SECTION 4 - FLOWCHARTS ═══════════════════════════════════ -->
   <div class="section" id="s4">
     <div class="section-header">
       <div class="section-number">04</div>
       <div class="section-title-block">
         <h2>Migration Flowcharts</h2>
-        <p>Visual reference — process flows match the steps in this document</p>
+        <p>Visual reference - process flows match the steps in this document</p>
       </div>
     </div>
 
     <!-- FLOWCHART 1: Overall Migration Flow -->
     <div class="flowchart-wrap">
-      <div class="flowchart-title">Flowchart 1 — Overall Migration Process (Top to Bottom)</div>
+      <div class="flowchart-title">Flowchart 1 - Overall Migration Process (Top to Bottom)</div>
       <svg viewBox="0 0 860 980" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:860px;display:block;margin:0 auto;">
         <defs>
           <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
@@ -1295,7 +1295,7 @@
         <line x1="425" y1="678" x2="425" y2="730" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
 
         <rect x="240" y="730" width="370" height="36" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
-        <text x="425" y="746" fill="#e6edf3" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="500">Run Manual Test — All Flows</text>
+        <text x="425" y="746" fill="#e6edf3" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="500">Run Manual Test - All Flows</text>
         <text x="425" y="760" fill="#8b949e" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10">Check run history · Verify child flows</text>
 
         <line x1="425" y1="766" x2="425" y2="782" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
@@ -1326,7 +1326,7 @@
 
     <!-- FLOWCHART 2: Desktop Flow / RPA Testing -->
     <div class="flowchart-wrap">
-      <div class="flowchart-title">Flowchart 2 — RPA / Desktop Flow Testing: HM (Dev) → HMG (Test/Prod)</div>
+      <div class="flowchart-title">Flowchart 2 - RPA / Desktop Flow Testing: HM (Dev) → HMG (Test/Prod)</div>
       <svg viewBox="0 0 860 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:860px;display:block;margin:0 auto;">
         <defs>
           <marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
@@ -1345,15 +1345,15 @@
 
         <!-- Column headers -->
         <rect x="100" y="10" width="280" height="30" rx="4" fill="rgba(0,212,255,0.07)" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
-        <text x="240" y="29" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600">DEV — HM (Attended)</text>
+        <text x="240" y="29" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600">DEV - HM (Attended)</text>
 
         <rect x="480" y="10" width="280" height="30" rx="4" fill="rgba(57,211,83,0.07)" stroke="rgba(57,211,83,0.2)" stroke-width="1"/>
-        <text x="620" y="29" text-anchor="middle" fill="#39d353" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600">TEST/PROD — HMG (Unattended)</text>
+        <text x="620" y="29" text-anchor="middle" fill="#39d353" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600">TEST/PROD - HMG (Unattended)</text>
 
         <!-- Vertical divider -->
         <line x1="430" y1="10" x2="430" y2="520" stroke="#1c2230" stroke-width="1.5" stroke-dasharray="6,4"/>
 
-        <!-- === LEFT COLUMN — HM DEV === -->
+        <!-- === LEFT COLUMN - HM DEV === -->
         <rect x="120" y="60" width="240" height="40" rx="4" fill="#0a1628" stroke="#00d4ff" stroke-width="1.5"/>
         <text x="240" y="76" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600">Import Solution to Dev</text>
         <text x="240" y="91" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">Turn on flows, assign owner</text>
@@ -1395,7 +1395,7 @@
         <line x1="360" y1="300" x2="478" y2="300" stroke="#f0a500" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a2y)"/>
         <text x="412" y="294" fill="#f0a500" font-family="IBM Plex Mono, monospace" font-size="9" text-anchor="middle">PROMOTE</text>
 
-        <!-- === RIGHT COLUMN — HMG TEST === -->
+        <!-- === RIGHT COLUMN - HMG TEST === -->
         <rect x="500" y="60" width="240" height="40" rx="4" fill="#0a2018" stroke="#39d353" stroke-width="1.5"/>
         <text x="620" y="76" text-anchor="middle" fill="#39d353" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600">Import to Test (Unmanaged)</text>
         <text x="620" y="91" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">Map conn refs + set env vars</text>
@@ -1410,7 +1410,7 @@
 
         <rect x="500" y="176" width="240" height="40" rx="4" fill="#1c2230" stroke="#2a3347" stroke-width="1"/>
         <text x="620" y="192" text-anchor="middle" fill="#e6edf3" font-family="IBM Plex Sans, sans-serif" font-size="12">Trigger via actual trigger (unattended)</text>
-        <text x="620" y="207" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">No manual trigger — simulate production</text>
+        <text x="620" y="207" text-anchor="middle" fill="#8b949e" font-family="IBM Plex Sans, sans-serif" font-size="10">No manual trigger - simulate production</text>
 
         <line x1="620" y1="216" x2="620" y2="234" stroke="#4a5568" stroke-width="1.5" marker-end="url(#a2)"/>
 
@@ -1448,7 +1448,7 @@
 
     <!-- FLOWCHART 3: Connection Reference Decision -->
     <div class="flowchart-wrap">
-      <div class="flowchart-title">Flowchart 3 — Connection Reference: Fix or Fail Decision</div>
+      <div class="flowchart-title">Flowchart 3 - Connection Reference: Fix or Fail Decision</div>
       <svg viewBox="0 0 860 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:860px;display:block;margin:0 auto;">
         <defs>
           <marker id="a3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
@@ -1553,11 +1553,12 @@
   <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px 0 32px;">
     <div>
       <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);">CRG → Thermo Fisher Scientific Migration</span><br>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);">Power Platform Lift &amp; Shift Survival Guide</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);">Power Platform Developer Guide</span>
     </div>
     <div style="text-align:right;">
       <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);">Strategy: Move First. Fix Later.</span><br>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--accent);">Version 1.0 — For Developer Use Only</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--accent);">Version 1.0 - For Developer Use Only</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--accent);">Author - Manik Sharma</span>
     </div>
   </div>
 
